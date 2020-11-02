@@ -1,44 +1,18 @@
 <!DOCTYPE html>
-<html>
+
     <head>
         <meta charset="utf-8" />
         <title>Super Chat temps réel !</title>
-        <style>
-            #zone_chat strong {
-                color: white;
-                background-color: black;
-                padding: 2px;
-            }
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; background: linear-gradient(-45deg, #183850 0, #183850 25%, #192C46 50%, #22254C 75%, #22254C 100%);background-repeat: no-repeat;
-  background-attachment: fixed;}
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      #message { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
-      #envoi_message { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      h1{ margin-left:40%;
-      }
-      ul li{
-        clear: both;
-    float: left;
-    padding: 6px 10px 7px;
-    border-radius: 10px 10px 10px 0;
-    background:  rgb(130, 224, 255);
-    margin: 8px 0;
-    font-size: 25px;
-    line-height: 1.4;
-    margin-left: 35px;
-    position: relative;
-    list-style: none;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, .2);
-    
-}
-      
-        </style>
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
- 
-    <body>
-        <h1>Le super Chat temps réel !</h1>
 
+
+    <body>
+        <div class="chat">
+        <h1 id="user"></h1>
+        <figure class="avatar">
+            <img src="https://www.flaticon.com/svg/static/icons/svg/1077/1077063.svg" />
+        </figure>
         <form action="/" method="post" id="formulaire_chat">
             <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
             <input type="submit" id="envoi_message" value="Envoyer" />
@@ -48,6 +22,10 @@
             
         </ul>
 
+        <div id="type">
+            <p id="us" style="display:none;"> Someone is typing</p>
+        </div>
+    </div>
 
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
@@ -60,6 +38,7 @@
             var pseudo = prompt('Quel est votre pseudo ?');
             socket.emit('nouveau_client', pseudo);
             document.title = pseudo + ' - ' + document.title;
+            $('#user').append($('<p id="utili">').text(pseudo));
 
             // Quand on reçoit un message, on l'insère dans la page
             socket.on('message', function(data) {
@@ -79,13 +58,25 @@
                 $('#message').val('').focus(); // Vide la zone de Chat et remet le focus dessus
                 return false; // Permet de bloquer l'envoi "classique" du formulaire
             });
-            
+            $('#message').keypress((e)=>{
+        if(e.which!=13){
+          typing=true
+          socket.emit('typing', {pseudo:socket.pseudo, typing:true})
+          console.log ('ok');
+         
+
+      }});
+      //insert le user is typping
+      socket.on('display', (data)=>{
+        $('#us').css("display", "block");
+      })
             // Ajoute un message dans la page
             function insereMessage(pseudo, message) {
                 $('#zone_chat').append($('<li>').text( pseudo + ': ' + message))
             }
+
+            
         </script>
     </body>
 </html>
   
-</html>

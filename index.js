@@ -1,10 +1,13 @@
 var app = require('express')();
+const express=require('express');
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
+
+app.use(express.static(__dirname + '/public'));
 
 io.sockets.on('connection', function (socket, pseudo) {
     
@@ -13,6 +16,8 @@ io.sockets.on('connection', function (socket, pseudo) {
         socket.pseudo = pseudo;
         socket.broadcast.emit('nouveau_client', pseudo);
     });
+    socket.on('typing', (data)=>{
+        socket.broadcast.emit('display', data);})
 
     // Dès qu'on reçoit un message, on récupère le pseudo de son auteur et on le transmet aux autres personnes
     socket.on('message', function (message) {
